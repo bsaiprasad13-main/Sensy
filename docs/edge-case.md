@@ -1,14 +1,14 @@
-# Sensei: Automated Missed Call Status Assistant - Edge Cases & Mitigations
+# Sensy: Automated Missed Call Status Assistant - Edge Cases & Mitigations
 
-This document outlines potential edge cases that Sensei might encounter in real-world usage, along with the technical and UX strategies to handle them gracefully.
+This document outlines potential edge cases that Sensy might encounter in real-world usage, along with the technical and UX strategies to handle them gracefully.
 
 ## 1. Call State & Telephony Edge Cases
 
 | Edge Case | Description | Mitigation Strategy |
 | :--- | :--- | :--- |
 | **Answered Call Delay** | The user answers the call, but it rings for a few seconds first. The system must not mistake `RINGING -> OFFHOOK` for a missed call. | Ensure the `CallReceiver` strictly validates that the call state transitioned from `RINGING` directly to `IDLE`. If it goes to `OFFHOOK` (answered), abort the SMS flow immediately. |
-| **Manually Rejected Calls** | The user actively declines an incoming call. | From the Android API perspective, a rejected call often looks identical to a missed call (`RINGING` -> `IDLE`). Sensei will treat this as a missed call and send the SMS. This is acceptable and expected behavior, as the user is still busy. |
-| **Call Waiting (On another call)** | The user is already on a call, and a second call comes in and is missed. | The broadcast receiver will still fire. Sensei should handle this smoothly and dispatch the SMS to the second caller, informing them of the status. |
+| **Manually Rejected Calls** | The user actively declines an incoming call. | From the Android API perspective, a rejected call often looks identical to a missed call (`RINGING` -> `IDLE`). Sensy will treat this as a missed call and send the SMS. This is acceptable and expected behavior, as the user is still busy. |
+| **Call Waiting (On another call)** | The user is already on a call, and a second call comes in and is missed. | The broadcast receiver will still fire. Sensy should handle this smoothly and dispatch the SMS to the second caller, informing them of the status. |
 | **Dual SIM Devices** | The user has two active SIMs. | `SmsManager.getDefault()` uses the system default SIM for SMS. For Version 1, we rely on the system default. A future enhancement could query `SubscriptionManager` to reply via the specific SIM that received the call. |
 | **Private / Unknown Callers** | An incoming call lacks a Caller ID. | The `CallReceiver` must check if the incoming phone number string is null or empty. If so, cleanly abort the operation because there is no destination to send the SMS to. |
 
@@ -24,7 +24,7 @@ This document outlines potential edge cases that Sensei might encounter in real-
 
 | Edge Case | Description | Mitigation Strategy |
 | :--- | :--- | :--- |
-| **OS Kills Background App / Doze Mode** | Android's aggressive battery management prevents the app from waking up on a call. | Provide prominent in-app instructions for the user to disable battery optimization specifically for Sensei. Additionally, use a manifest-declared `BroadcastReceiver` (or `CallScreeningService`), which Android inherently prioritizes waking up during telephony events. |
+| **OS Kills Background App / Doze Mode** | Android's aggressive battery management prevents the app from waking up on a call. | Provide prominent in-app instructions for the user to disable battery optimization specifically for Sensy. Additionally, use a manifest-declared `BroadcastReceiver` (or `CallScreeningService`), which Android inherently prioritizes waking up during telephony events. |
 | **Device Reboot** | The phone is restarted while a status is active. | `AlarmManager` intents are cleared on reboot. We need a `BOOT_COMPLETED` receiver. When the phone boots, check `SharedPreferences`. If a status is active and time remains, re-register the alarm. If time has expired, clear the status. |
 | **Network Unreachable / SMS Failure** | The phone has no cellular signal to dispatch the SMS. | This is outside the app's immediate control. We will call `SmsManager`, but the OS message queue will handle delivery retries once the signal is restored. |
 

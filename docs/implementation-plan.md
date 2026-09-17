@@ -1,6 +1,6 @@
-# Sensei: Automated Missed Call Status Assistant - Phase-Wise Implementation Plan
+# Sensy: Automated Missed Call Status Assistant - Phase-Wise Implementation Plan
 
-This document outlines the step-by-step technical implementation of the Sensei application, structured to minimize risk by validating core logic and UI before integrating complex system APIs.
+This document outlines the step-by-step technical implementation of the Sensy application, structured to minimize risk by validating core logic and UI before integrating complex system APIs.
 
 ## Phase 1: Project Setup & Core Logic
 **Goal:** Establish the foundation and ensure the core calculation logic is flawless before interacting with Android system APIs.
@@ -63,7 +63,7 @@ This document outlines the step-by-step technical implementation of the Sensei a
 - [x] **Step 5.2: UI Refinements** 
     - [x] Polish the `MainActivity` design (Material 3). Add smooth transitions and handle edge cases in user input nicely.
 - [x] **Step 5.3: Battery Optimization Guidance** 
-    - [x] Add an in-app prompt or settings button to guide the user to disable Android battery optimization for Sensei, ensuring the Call Receiver isn't aggressively killed by the OS.
+    - [x] Add an in-app prompt or settings button to guide the user to disable Android battery optimization for Sensy, ensuring the Call Receiver isn't aggressively killed by the OS.
 
 ## Phase 6: Widget Redesign & Dynamic History (Proposed)
 **Goal:** Make the widget look premium and allow flexible status selection without opening the app, while working around Android's strict widget limitations.
