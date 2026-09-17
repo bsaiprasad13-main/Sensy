@@ -1,7 +1,7 @@
-# Sensei: Automated Missed Call Status Assistant - Detailed Problem Statement & Project Context
+# Sensy: Automated Missed Call Status Assistant - Detailed Problem Statement & Project Context
 
 ## Executive Summary
-Sensei (`com.saiprasad.sensei`) is a personal Android assistant designed to solve a specific communication gap: informing callers of your status and expected callback time when you are unable to answer the phone (e.g., while playing a sport, driving, or taking a bath). Unlike standard, unhelpful voicemail or unanswered ringing, Sensei acts proactively by sending an automated, dynamically calculated SMS to the caller, providing immediate context and reducing frustration.
+Sensy (`com.saiprasad.sensy`) is a personal Android assistant designed to solve a specific communication gap: informing callers of your status and expected callback time when you are unable to answer the phone (e.g., while playing a sport, driving, or taking a bath). Unlike standard, unhelpful voicemail or unanswered ringing, Sensy acts proactively by sending an automated, dynamically calculated SMS to the caller, providing immediate context and reducing frustration.
 
 ## 1. The Core Problem
 When a user is temporarily separated from their phone or engaged in an activity where they cannot answer calls, incoming callers are left without context. They do not know:
@@ -11,8 +11,8 @@ When a user is temporarily separated from their phone or engaged in an activity 
 
 This lack of information creates frustration and worry for the caller, especially for urgent matters. For the user, it results in returning to missed calls without knowing the urgency or managing caller expectations. While messaging apps (like WhatsApp) and emails have "away" statuses or auto-replies, standard cellular phone calls lack this critical, immediate context.
 
-## 2. The Solution: Sensei
-Sensei bridges this gap by functioning as a quiet, automated personal assistant. The solution is an on-device Android application that allows the user to set a temporary "status" (with an optional duration). If a call is missed while the status is active, Sensei automatically replies to the caller via SMS with the user's current activity and a dynamically calculated time until they are free.
+## 2. The Solution: Sensy
+Sensy bridges this gap by functioning as a quiet, automated personal assistant. The solution is an on-device Android application that allows the user to set a temporary "status" (with an optional duration). If a call is missed while the status is active, Sensy automatically replies to the caller via SMS with the user's current activity and a dynamically calculated time until they are free.
 
 ### Why SMS over other methods?
 During the design phase, alternative approaches like real-time voice call screening and dynamic voicemail greetings were considered. They were rejected because:
@@ -39,7 +39,7 @@ The primary objective is to build a reliable, fast-to-use, battery-efficient app
 - iOS support (due to fundamental differences in OS-level call handling).
 
 ## 4. Technical Architecture
-Sensei is designed with a simple, robust architecture focusing on privacy and zero reliance on cloud services. It consists of four main components interacting locally:
+Sensy is designed with a simple, robust architecture focusing on privacy and zero reliance on cloud services. It consists of four main components interacting locally:
 
 1. **User Interface (UI):** Built in Kotlin, this includes the status picker, duration selector, and eventually a home screen widget (`AppWidgetProvider`) for one-tap activation.
 2. **Local Storage:** The app's memory (using `SharedPreferences` or similar) to store the active status text, the exact start time, and the duration. It does not store fixed end times, ensuring robust calculations.
@@ -47,7 +47,7 @@ Sensei is designed with a simple, robust architecture focusing on privacy and ze
 4. **Message Sender & Calculator:** Upon a missed call, this component queries local storage, validates the debounce criteria, calculates the accurate remaining time, constructs the message (e.g., "Sai is playing cricket and will call back in around 20 minutes"), and dispatches it via `SmsManager`.
 
 ## 5. Technical Challenges & Mitigations
-- **Aggressive Battery Optimization:** Android may kill background services. *Mitigation:* Guide the user to manually disable battery optimization for Sensei and employ recommended background service patterns. The listener is kept permanently registered but idle to ensure it is always ready without draining power.
+- **Aggressive Battery Optimization:** Android may kill background services. *Mitigation:* Guide the user to manually disable battery optimization for Sensy and employ recommended background service patterns. The listener is kept permanently registered but idle to ensure it is always ready without draining power.
 - **Manufacturer Restrictions:** Custom UI skins (e.g., Xiaomi, Oppo) aggressively block call listeners. *Mitigation:* Conduct primary testing directly on the target physical device rather than an emulator to accommodate OEM-specific quirks.
 - **Accidental Triggers:** Ensuring the app doesn't send a text if the user answers the call on the second ring. *Mitigation:* Strict validation of call states to differentiate between a brief ring and a truly missed call.
 - **Calculation Accuracy:** *Mitigation:* The core remaining-time calculation function is isolated and tested independently before integrating it with call detection APIs.

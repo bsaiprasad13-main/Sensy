@@ -12,12 +12,12 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_sensei"
+        android:icon="@mipmap/ic_sensy"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_sensei"
+        android:roundIcon="@mipmap/ic_sensy"
         android:supportsRtl="true"
         android:windowSoftInputMode="adjustResize"
-        android:theme="@style/Theme.Sensei">
+        android:theme="@style/Theme.Sensy">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -30,7 +30,9 @@
         <service
             android:name=".service.StatusService"
             android:foregroundServiceType="specialUse"
-            android:exported="false" />
+            android:exported="false">
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="Displays the user's active status" />
+        </service>
 
         <receiver
             android:name=".receiver.CallReceiver"
@@ -48,21 +50,21 @@
             android:name=".receiver.AlarmReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.example.sensei.ACTION_CLEAR_STATUS" />
+                <action android:name="com.example.sensy.ACTION_CLEAR_STATUS" />
             </intent-filter>
         </receiver>
 
         <receiver
-            android:name=".widget.SenseiWidgetProvider"
+            android:name=".widget.SensyWidgetProvider"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-                <action android:name="com.example.sensei.WIDGET_CLEAR" />
-                <action android:name="com.example.sensei.WIDGET_LIST_CLICK" />
+                <action android:name="com.example.sensy.WIDGET_CLEAR" />
+                <action android:name="com.example.sensy.WIDGET_LIST_CLICK" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/sensei_widget_info" />
+                android:resource="@xml/sensy_widget_info" />
         </receiver>
 
         <service

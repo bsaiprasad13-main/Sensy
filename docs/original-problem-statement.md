@@ -1,7 +1,7 @@
-# Problem Statement: Sensei, an Automated Missed Call Status Assistant
+# Problem Statement: Sensy, an Automated Missed Call Status Assistant
 
-**App name: Sensei**
-The name is inspired by the Japanese word for teacher or guide, a quiet presence that watches out for you and handles things on your behalf while you're away, without needing to be asked. Package name reference going forward: `com.saiprasad.sensei`.
+**App name: Sensy**
+The name is inspired by the Japanese word for teacher or guide, a quiet presence that watches out for you and handles things on your behalf while you're away, without needing to be asked. Package name reference going forward: `com.saiprasad.sensy`.
 
 ## 1. The Problem
 
@@ -67,7 +67,7 @@ This approach detects a missed call using Android's own call state APIs and imme
 - **Debounce logic checked early, before any calculation**: without this, if someone calls three times in five minutes because they are worried, they would get three identical texts, which feels robotic and annoying rather than helpful. The debounce check should run right after confirming a status is active, before the remaining time is calculated or the message is built, so repeat calls are rejected quickly without unnecessary work.
 - **Call listener stays registered at all times, but stays idle when there is nothing to do**: the listener itself costs almost no battery sitting idle, since Android only wakes it up when an actual call event happens. Rather than trying to switch it on and off based on whether a status is active, which risks timing issues, the listener stays registered permanently, and simply checks a flag the moment it wakes up, is a status active. If not, it exits immediately with no further work. This keeps battery impact minimal without adding fragility.
 - **Status auto expiry**: if I forget to turn off a status, callers after I am already free would get a false message saying I am still busy, which defeats the purpose and could even cause confusion or mistrust in the tool.
-- **Permissions**: Android treats call log access and SMS sending as sensitive permissions. Since Sensei is for personal use only and will be sideloaded rather than published, this is manageable, but it is worth knowing in case the project is ever shared or published later.
+- **Permissions**: Android treats call log access and SMS sending as sensitive permissions. Since Sensy is for personal use only and will be sideloaded rather than published, this is manageable, but it is worth knowing in case the project is ever shared or published later.
 - **No fixed status options**: presets like Cricket or Bath exist only to make repeat entries faster, since those are the activities I will log the most. A custom text field is always available so the status can describe anything, this keeps the tool flexible instead of forcing my day into a fixed menu.
 - **Dynamic remaining time, not a static repeat**: if I set a 30 minute status, the app does not just remember "30 minutes" and repeat that number to every caller. It stores the time the status started and the total duration, then calculates remaining time fresh at the moment each call is missed, using current time minus start time, subtracted from total duration. A caller at the very end of the window hears the task is finishing, a caller ten minutes in hears an accurate lower number, not the original 30. This matters because a static repeated number would actively mislead callers the later they call into the window.
 
@@ -90,10 +90,10 @@ This approach detects a missed call using Android's own call state APIs and imme
 - Add a home screen widget for one tap status setting.
 - Add a persistent notification showing the active status and a quick "I'm back" button to clear it manually.
 - Refine the SMS message template to sound natural and not robotic.
-- Review and disable battery optimization for Sensei so Android does not kill the background service, and confirm the app is set as needed for call screening access.
+- Review and disable battery optimization for Sensy so Android does not kill the background service, and confirm the app is set as needed for call screening access.
 
 **Phase 4: Review and maintain**
-- Use Sensei daily for a couple of weeks and note any missed detections or false triggers.
+- Use Sensy daily for a couple of weeks and note any missed detections or false triggers.
 - Revisit after any major Android OS update on my phone to confirm permissions and background behavior still work as expected, roughly once or twice a year.
 
 ## 8. Success Criteria

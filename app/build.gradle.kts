@@ -8,10 +8,10 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sensei"
+    namespace = "com.example.sensy"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.example.sensei"
+        applicationId = "com.example.sensy"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

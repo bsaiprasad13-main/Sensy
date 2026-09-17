@@ -1,8 +1,8 @@
-# Technical Overview: Sensei, the Missed Call Status App
+# Technical Overview: Sensy, the Missed Call Status App
 
-**App name: Sensei** (package name reference: `com.saiprasad.sensei`)
+**App name: Sensy** (package name reference: `com.saiprasad.sensy`)
 
-This document explains how Sensei works under the hood, in plain terms, so you have a full mental model before building anything in Antigravity.
+This document explains how Sensy works under the hood, in plain terms, so you have a full mental model before building anything in Antigravity.
 
 ## 1. What "Architecture" Means Here
 

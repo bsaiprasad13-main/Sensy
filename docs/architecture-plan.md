@@ -1,7 +1,7 @@
-# Sensei: Automated Missed Call Status Assistant - Architecture Plan
+# Sensy: Automated Missed Call Status Assistant - Architecture Plan
 
 ## 1. High-Level Architecture Overview
-The Sensei application follows a simple, localized, event-driven architecture. The system relies entirely on on-device processing, ensuring privacy, zero latency (no network calls), and high reliability. The architecture is divided into three primary layers:
+The Sensy application follows a simple, localized, event-driven architecture. The system relies entirely on on-device processing, ensuring privacy, zero latency (no network calls), and high reliability. The architecture is divided into three primary layers:
 1.  **Presentation Layer (UI):** Facilitates user interaction for setting and viewing status.
 2.  **Data Layer:** Manages persistence of the current status and duration.
 3.  **Background Processing & System Integration Layer:** Listens for system events (incoming calls) and interacts with system services (SMS).
