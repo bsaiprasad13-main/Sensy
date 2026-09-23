@@ -36,13 +36,14 @@ class StatusService : Service() {
             return START_NOT_STICKY
         }
 
-        val notification = createNotification(activeStatus.statusText)
+        val notification = createNotification(activeStatus)
         startForeground(NOTIFICATION_ID, notification)
 
         return START_STICKY
     }
 
-    private fun createNotification(statusText: String): Notification {
+    private fun createNotification(activeStatus: com.example.sensy.data.ActiveStatus): Notification {
+        val statusText = activeStatus.statusText
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -59,7 +60,7 @@ class StatusService : Service() {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("Sensy Active")
             .setContentText("Status: $statusText")
             // A typical placeholder icon
@@ -67,7 +68,17 @@ class StatusService : Service() {
             .setContentIntent(pendingIntent)
             .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Clear Status", stopPendingIntent)
             .setOngoing(true)
-            .build()
+
+        if (activeStatus.durationMinutes != -1) {
+            val endTime = activeStatus.startTimeMillis + (activeStatus.durationMinutes * 60 * 1000L)
+            builder.setUsesChronometer(true)
+            builder.setWhen(endTime)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                builder.setChronometerCountDown(true)
+            }
+        }
+
+        return builder.build()
     }
 
     private fun createNotificationChannel() {
@@ -95,10 +106,15 @@ class StatusService : Service() {
 
         fun start(context: Context) {
             val intent = Intent(context, StatusService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    context.startForegroundService(intent)
+                } else {
+                    context.startService(intent)
+                }
+            } catch (e: Exception) {
+                // Ignore exception if it fails to start in the background (e.g., ForegroundServiceStartNotAllowedException)
+                e.printStackTrace()
             }
         }
 
