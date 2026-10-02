@@ -50,11 +50,9 @@ class WidgetRemoteViewsFactory(private val context: Context) : RemoteViewsServic
             putExtra(SensyWidgetProvider.EXTRA_STATUS_TEXT, status.text)
             putExtra(SensyWidgetProvider.EXTRA_DURATION_MINS, status.durationMinutes)
         }
-        rv.setOnClickFillInIntent(R.id.widget_list_item_root, fillInIntent) 
-        // It's safer to set the fill-in intent on the root layout, but we don't have an ID for root. Let's just set it on the texts or assign an ID to root.
-        // Wait, widget_list_item.xml root is a LinearLayout without an ID.
-        // Actually, setOnClickFillInIntent works on the root if we give it an ID, let's assume item_status_text click is fine, but let's give the root an ID.
-        // I will just use R.id.item_status_text for now, but really I should add an ID to the root. I'll modify the layout shortly to add an ID.
+        rv.setOnClickFillInIntent(R.id.widget_list_item_root, fillInIntent)
+        rv.setOnClickFillInIntent(R.id.item_status_text, fillInIntent)
+        rv.setOnClickFillInIntent(R.id.item_duration_text, fillInIntent)
 
         return rv
     }

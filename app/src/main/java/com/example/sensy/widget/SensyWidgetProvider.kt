@@ -59,11 +59,21 @@ class SensyWidgetProvider : AppWidgetProvider() {
                         context, 0, alarmIntent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
                     )
                     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
-                    alarmManager.setExactAndAllowWhileIdle(
-                        android.app.AlarmManager.RTC_WAKEUP,
-                        System.currentTimeMillis() + (durationMins * 60 * 1000L),
-                        pendingIntent
-                    )
+                    val triggerTime = System.currentTimeMillis() + (durationMins * 60 * 1000L)
+                    
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
+                        alarmManager.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+                    } else {
+                        try {
+                            alarmManager.setExactAndAllowWhileIdle(
+                                android.app.AlarmManager.RTC_WAKEUP,
+                                triggerTime,
+                                pendingIntent
+                            )
+                        } catch (e: SecurityException) {
+                            alarmManager.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent)
+                        }
+                    }
                 }
             }
 
@@ -89,12 +99,26 @@ class SensyWidgetProvider : AppWidgetProvider() {
             val views = RemoteViews(context.packageName, R.layout.widget_sensy)
 
             if (activeStatus != null) {
-                val durationStr = if (activeStatus.durationMinutes == -1) "No Limit" else "${activeStatus.durationMinutes}m"
-                views.setTextViewText(R.id.widget_active_status, "Active: ${activeStatus.statusText} ($durationStr)")
+                views.setTextViewText(R.id.widget_active_status, "Active: ${activeStatus.statusText}")
                 views.setTextColor(R.id.widget_active_status, android.graphics.Color.parseColor("#4CAF50")) // Green
+                
+                if (activeStatus.durationMinutes != -1) {
+                    val endTime = activeStatus.startTimeMillis + (activeStatus.durationMinutes * 60 * 1000L)
+                    val timeRemaining = endTime - System.currentTimeMillis()
+                    val chronometerBase = android.os.SystemClock.elapsedRealtime() + timeRemaining
+                    
+                    views.setChronometer(R.id.widget_chronometer, chronometerBase, "Time Remaining: %s", true)
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                        views.setChronometerCountDown(R.id.widget_chronometer, true)
+                    }
+                    views.setViewVisibility(R.id.widget_chronometer, android.view.View.VISIBLE)
+                } else {
+                    views.setViewVisibility(R.id.widget_chronometer, android.view.View.GONE)
+                }
             } else {
                 views.setTextViewText(R.id.widget_active_status, "No active status")
                 views.setTextColor(R.id.widget_active_status, android.graphics.Color.parseColor("#888888")) // Grey
+                views.setViewVisibility(R.id.widget_chronometer, android.view.View.GONE)
             }
 
             // Buttons

@@ -275,6 +275,35 @@ fun ActiveStatusCard(status: ActiveStatus, onClearClick: () -> Unit) {
             val durationText = if (status.durationMinutes == -1) "No Limit" else "${status.durationMinutes} mins"
             Text("Duration: $durationText", style = MaterialTheme.typography.bodyMedium)
 
+            if (status.durationMinutes != -1) {
+                var remainingTimeText by remember(status) { mutableStateOf("") }
+                
+                LaunchedEffect(status) {
+                    val endTime = status.startTimeMillis + (status.durationMinutes * 60 * 1000L)
+                    while(true) {
+                        val remaining = endTime - System.currentTimeMillis()
+                        if (remaining > 0) {
+                            val mins = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(remaining)
+                            val secs = java.util.concurrent.TimeUnit.MILLISECONDS.toSeconds(remaining) % 60
+                            remainingTimeText = String.format("%02d:%02d", mins, secs)
+                        } else {
+                            remainingTimeText = "00:00"
+                            break
+                        }
+                        kotlinx.coroutines.delay(1000)
+                    }
+                }
+                
+                if (remainingTimeText.isNotEmpty()) {
+                    Text(
+                        text = "Time Remaining: $remainingTimeText",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                    )
+                }
+            }
+
             Divider(modifier = Modifier.padding(vertical = 4.dp))
             
             Text("Auto-Reply Preview:", style = MaterialTheme.typography.labelMedium)
