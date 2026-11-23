@@ -6,6 +6,7 @@ import android.os.IBinder
 import android.telephony.SmsManager
 import android.util.Log
 import com.example.sensy.TimeCalculator
+import com.example.sensy.data.ContactChecker
 import com.example.sensy.data.SmsLogRepository
 import com.example.sensy.data.StatusRepository
 
@@ -44,13 +45,21 @@ class SmsDispatcherService : Service() {
                     }
                 }
 
-                // Construct message
-                val message = com.example.sensy.MessageBuilder.buildSmsMessage(
-                    activeStatus.statusText,
-                    activeStatus.startTimeMillis,
-                    activeStatus.durationMinutes
+                // Only saved contacts get the personal status; unknown numbers get a
+                // generic reply (or nothing, if the user turned that on).
+                val isSavedContact = ContactChecker(this).isSavedContact(incomingNumber)
+                val message = com.example.sensy.MessageBuilder.messageFor(
+                    isSavedContact = isSavedContact,
+                    skipUnknownNumbers = statusRepository.isSkipUnknownNumbers(),
+                    statusText = activeStatus.statusText,
+                    startTimeMillis = activeStatus.startTimeMillis,
+                    durationMinutes = activeStatus.durationMinutes
                 )
-                sendSms(incomingNumber, message)
+                if (message != null) {
+                    sendSms(incomingNumber, message)
+                } else {
+                    Log.d("SmsDispatcher", "Unknown number and replies to unknown numbers are off; not sending.")
+                }
             }
         }
         stopSelf()

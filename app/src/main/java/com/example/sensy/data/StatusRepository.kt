@@ -151,8 +151,16 @@ class StatusRepository(context: Context) {
         savePresets(presets)
     }
 
+    /** When true, callers not in contacts get no reply at all (instead of the generic message). */
+    fun isSkipUnknownNumbers(): Boolean = prefs.getBoolean(KEY_SKIP_UNKNOWN_NUMBERS, false)
+
+    fun setSkipUnknownNumbers(skip: Boolean) {
+        prefs.edit().putBoolean(KEY_SKIP_UNKNOWN_NUMBERS, skip).apply()
+    }
+
     companion object {
         private const val PREFS_NAME = "sensy_status_prefs"
+        private const val KEY_SKIP_UNKNOWN_NUMBERS = "skip_unknown_numbers"
         private const val KEY_STATUS_TEXT = "status_text"
         private const val KEY_START_TIME = "start_time"
         private const val KEY_DURATION = "duration_minutes"
