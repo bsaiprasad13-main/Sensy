@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation3.runtime.NavKey
 import androidx.compose.ui.res.painterResource
 import com.example.sensy.data.ActiveStatus
+import com.example.sensy.data.ContactChecker
 import com.example.sensy.data.PresetStatus
 
 class MainScreenViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
@@ -48,10 +49,13 @@ fun MainScreen(
     var customDurationText by remember { mutableStateOf("15") }
     var showPresetsDialog by remember { mutableStateOf(false) }
 
+    val contactChecker = remember { ContactChecker(context) }
+    var hasContactsPermission by remember { mutableStateOf(contactChecker.hasPermission()) }
+
     val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        // Handle
+    ) { _ ->
+        hasContactsPermission = contactChecker.hasPermission()
     }
 
     LaunchedEffect(Unit) {
@@ -59,6 +63,7 @@ fun MainScreen(
             arrayOf(
                 android.Manifest.permission.READ_PHONE_STATE,
                 android.Manifest.permission.READ_CALL_LOG,
+                android.Manifest.permission.READ_CONTACTS,
                 android.Manifest.permission.SEND_SMS,
                 "android.permission.POST_NOTIFICATIONS"
             )
@@ -81,7 +86,13 @@ fun MainScreen(
         if (state.activeStatus != null) {
             ActiveStatusCard(
                 status = state.activeStatus!!,
+                skipUnknownNumbers = state.skipUnknownNumbers,
                 onClearClick = { viewModel.clearStatus() }
+            )
+            UnknownNumbersSetting(
+                skipUnknownNumbers = state.skipUnknownNumbers,
+                hasContactsPermission = hasContactsPermission,
+                onCheckedChange = { viewModel.setSkipUnknownNumbers(it) }
             )
         } else {
             Row(
@@ -165,6 +176,12 @@ fun MainScreen(
             ) {
                 Text("Set Status")
             }
+
+            UnknownNumbersSetting(
+                skipUnknownNumbers = state.skipUnknownNumbers,
+                hasContactsPermission = hasContactsPermission,
+                onCheckedChange = { viewModel.setSkipUnknownNumbers(it) }
+            )
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -261,7 +278,40 @@ fun PresetsDialog(
 }
 
 @Composable
-fun ActiveStatusCard(status: ActiveStatus, onClearClick: () -> Unit) {
+fun UnknownNumbersSetting(
+    skipUnknownNumbers: Boolean,
+    hasContactsPermission: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Don't reply to unknown numbers", style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    if (skipUnknownNumbers) "Only saved contacts get a reply."
+                    else "Unknown numbers get a generic reply without your status.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Switch(checked = skipUnknownNumbers, onCheckedChange = onCheckedChange)
+        }
+        if (!hasContactsPermission) {
+            Text(
+                "Contacts permission is off, so every caller is treated as unknown.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
+}
+
+@Composable
+fun ActiveStatusCard(status: ActiveStatus, skipUnknownNumbers: Boolean, onClearClick: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
@@ -306,17 +356,24 @@ fun ActiveStatusCard(status: ActiveStatus, onClearClick: () -> Unit) {
 
             Divider(modifier = Modifier.padding(vertical = 4.dp))
             
-            Text("Auto-Reply Preview:", style = MaterialTheme.typography.labelMedium)
+            val previewStyle = MaterialTheme.typography.bodyMedium
+            val previewColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            val italic = androidx.compose.ui.text.font.FontStyle.Italic
+
+            Text("Saved contacts get:", style = MaterialTheme.typography.labelMedium)
             val previewMessage = com.example.sensy.MessageBuilder.buildSmsMessage(
                 status.statusText,
                 status.startTimeMillis,
                 status.durationMinutes
             )
+            Text(text = previewMessage, style = previewStyle, fontStyle = italic, color = previewColor)
+
+            Text("Unknown numbers get:", style = MaterialTheme.typography.labelMedium)
             Text(
-                text = previewMessage,
-                style = MaterialTheme.typography.bodyMedium,
-                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                text = if (skipUnknownNumbers) "No reply" else com.example.sensy.MessageBuilder.GENERIC_MESSAGE,
+                style = previewStyle,
+                fontStyle = italic,
+                color = previewColor
             )
 
             Button(

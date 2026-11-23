@@ -43,7 +43,12 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
         val active = repository.getActiveStatus()
         val recents = repository.getRecentStatuses()
         val presets = repository.getPresets()
-        _uiState.value = MainScreenUiState(active, recents, presets)
+        _uiState.value = MainScreenUiState(active, recents, presets, repository.isSkipUnknownNumbers())
+    }
+
+    fun setSkipUnknownNumbers(skip: Boolean) {
+        repository.setSkipUnknownNumbers(skip)
+        loadStatus()
     }
 
     fun addPreset(preset: PresetStatus) {
@@ -143,5 +148,6 @@ class MainScreenViewModel(application: Application) : AndroidViewModel(applicati
 data class MainScreenUiState(
     val activeStatus: ActiveStatus? = null,
     val recentStatuses: List<RecentStatus> = emptyList(),
-    val presets: List<PresetStatus> = emptyList()
+    val presets: List<PresetStatus> = emptyList(),
+    val skipUnknownNumbers: Boolean = false
 )
